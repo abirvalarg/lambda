@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 pub mod variable;
+pub mod error;
+pub mod parser;
 
 pub struct Lambda {
 }
