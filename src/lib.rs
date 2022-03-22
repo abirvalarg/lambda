@@ -12,6 +12,9 @@ impl Lambda {
 		}
 	}
 
+	fn run(&self, text: &str) {
+	}
+
 	pub fn init(&mut self) {
 	}
 }
