@@ -1,0 +1,8 @@
+!prompt "a"
+a = input:unsigned	# a> 
+!prompt "b"
+b = input a:unsigned
+# b:
+# 1> 
+b = (\x -> x + 1) a
+output b

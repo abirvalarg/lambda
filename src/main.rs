@@ -5,6 +5,7 @@ fn run(args: args::Args) -> Result<(), Box<dyn std::error::Error>> {
     } else if args.show_version {
     } else {
         let mut vm: lambda::Lambda = Default::default();
+        vm.set_input(|_promt, _index| Err(Box::new(lambda::error::NotImplemented) as Box<dyn std::error::Error>));
     }
     Ok(())
 }
