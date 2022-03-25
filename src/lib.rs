@@ -2,6 +2,7 @@
 
 pub mod variable;
 pub mod error;
+pub mod parser;
 
 pub trait InputFunction<'a> = FnMut(&'static str, Option<Box<dyn variable::Value + 'a>>) -> Result<Box<dyn variable::Value + 'a>, Box<dyn std::error::Error>>;
 
@@ -14,6 +15,9 @@ impl<'a> Lambda<'a> {
 		Lambda {
 			input: None
 		}
+	}
+
+	fn run(&self, _text: &str) {
 	}
 
 	pub fn init(&mut self) {
