@@ -1,21 +1,20 @@
-fn tokenize(mut input: &str) -> Result<Vec<Token>, Box<dyn std::error::Error>> {
+pub fn tokenize(mut input: &str) -> Result<Vec<Token>, Box<dyn std::error::Error>> {
     input = input.trim();
     if let Some((data, _)) = input.split_once('#') {
         input = data.trim();
     }
     let input = input.chars();
     let mut token_buffer = String::new();
+    let mut raw_tokens = Vec::new();
     let mut result = Vec::new();
     for ch in input {
-        if "{[()]}".contains(ch) {
-            result.push(Token::Operator(Operator::Bracket(ch)));
-        } else if ch == '\\' {
-            result.push(Token::Operator(Operator::Lambda));
-        } else if ch == '-' {
-            token_buffer.push(ch);
-        } else if ch == '>' && token_buffer == "-" {
-            result.push(Token::Operator(Operator::Arrow));
+        if ch.is_ascii_whitespace() && ch != '\n' && !token_buffer.is_empty() {
+            raw_tokens.push(token_buffer.clone());
             token_buffer.clear();
+        } else {
+            match ch {
+                _ => token_buffer.push(ch)
+            }
         }
     }
     Ok(result)
@@ -24,7 +23,7 @@ fn tokenize(mut input: &str) -> Result<Vec<Token>, Box<dyn std::error::Error>> {
 #[derive(Debug)]
 pub enum Token {
     Keyword(Keyword),
-    Macro(Macro),
+    Directive(Directive),
     Literal(Literal),
     Variable(String),
     Operator(Operator)
@@ -39,15 +38,14 @@ pub enum Keyword {
 
 #[non_exhaustive]
 #[derive(Debug)]
-pub enum Macro {
+pub enum Directive {
     Prompt(String)
 }
 
 #[non_exhaustive]
 #[derive(Debug)]
 pub enum Literal {
-    Unsigned(u32),
-    String(String)
+    Unsigned(u32)
 }
 
 #[non_exhaustive]
