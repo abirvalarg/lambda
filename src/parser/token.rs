@@ -30,11 +30,12 @@ pub enum LexToken {
     Sep,
 
     #[error]
-    #[regex(r"\s+", logos::skip)]
+    #[regex("[ \t]+", logos::skip)]
     #[regex("#[^\n]*", logos::skip)]
     Error
 }
 
+#[derive(Debug)]
 pub struct Token {
     pub(super) kind: LexToken,
     pub(super) value: String,

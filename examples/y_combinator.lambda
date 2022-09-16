@@ -1,7 +1,6 @@
-let true = (\a.\b. a)
-let false = (\a.\b. b)
+let true = \a.\b. a
+let false = \a.\b. b
 
-let Y = (\f. (\x. f (x x)) (\x. f (x x)))
-
-let foo = Y \self.\nested. nested (self false) (\s.\z. s z)
-print_num (foo true)
+let Y = \f. ((\x. f (x x)) (\x. f (x x)))
+let foo = Y (\self.\nested. nested (self false) (\s.\z. s z))
+print_num (foo false)

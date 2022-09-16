@@ -17,7 +17,6 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     let path = args[1].clone();
     let src = std::fs::read_to_string(&path)?;
     let actions = parser::parse(&src, &path)?;
-    println!("{:#?}", actions);
     let mut state = state::State::new();
     let globals = state.globals_mut();
     globals.insert("print_num".into(), Value::native_function(print_num));
@@ -41,6 +40,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn print_num(state: &mut state::State, val: Value) -> Result<Value, Box<dyn std::error::Error>> {
+    println!("{val:#?}");
     let tmp1 = Value::LazyCall {
         func: Rc::new(RefCell::new(val)),
         arg: Value::native_function(|_state, val| {
