@@ -1,0 +1,10 @@
+chunk ::= {stat sep}
+stat ::= [let ident `=`] expr
+
+expr ::= [expr] item
+
+item ::= `(` expr `)`
+    | ident
+    | funcdef
+
+funcdef ::= `\` ident `->` expr

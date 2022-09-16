@@ -1,0 +1,8 @@
+[package]
+name = "lambda"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+ariadne = "0.1.5"
+logos = "0.12.1"

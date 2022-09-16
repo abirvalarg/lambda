@@ -1,0 +1,4 @@
+let two = \s.\z.s (s z)         # 2
+let three = \s.\z.s (s (s z))   # 3
+let mul = \a.\b.\s. a (b s)
+print_num (mul two three)       # 2 * 3
