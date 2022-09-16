@@ -14,33 +14,33 @@ impl Display for Usage {
 impl std::error::Error for Usage {}
 
 #[derive(Debug)]
-pub struct CallNotFunction; /* {
+pub struct CallNotFunction {
     path: String,
     span: logos::Span,
-} */
+}
 
-// impl CallNotFunction {
-//     pub fn new(path: &str, span: logos::Span) -> Self {
-//         CallNotFunction {
-//             // path: path.into(),
-//             // span
-//         }
-//     }
-// }
+impl CallNotFunction {
+    pub fn new(path: &str, span: logos::Span) -> Self {
+        CallNotFunction {
+            path: path.into(),
+            span
+        }
+    }
+}
 
 impl Display for CallNotFunction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        // let mut buf = Vec::new();
-        // let src = sources([(self.path.clone(), std::fs::read_to_string(&self.path).unwrap())]);
+        let mut buf = Vec::new();
+        let src = sources([(self.path.clone(), std::fs::read_to_string(&self.path).unwrap())]);
 
-        // Report::build(ReportKind::Error, self.path.clone(), self.span.start)
-        //     .with_label(Label::new((self.path.clone(), self.span.clone())).with_message("attempt to call non-function value"))
-        //     .finish()
-        //     .write(src, &mut buf)
-        //     .unwrap();
+        Report::build(ReportKind::Error, self.path.clone(), self.span.start)
+            .with_label(Label::new((self.path.clone(), self.span.clone())).with_message("attempt to call non-function value"))
+            .finish()
+            .write(src, &mut buf)
+            .unwrap();
 
-        // write!(f, "{}", String::from_utf8(buf).unwrap())
-        write!(f, "attempt to call a non-function value")
+        write!(f, "{}", String::from_utf8(buf).unwrap())
+        // write!(f, "attempt to call a non-function value")
     }
 }
 

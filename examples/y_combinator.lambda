@@ -2,5 +2,9 @@ let true = \a.\b. a
 let false = \a.\b. b
 
 let Y = \f. ((\x. f (x x)) (\x. f (x x)))
-let foo = Y (\self.\nested. nested (self false) (\s.\z. s z))
-print_num (foo false)
+let foo = \self.\nest. nest (self false) (\s.\z. s z)
+let foo = Y foo
+
+# print_num (foo (\_.\x. foo x x) false)
+
+print_num (foo true)

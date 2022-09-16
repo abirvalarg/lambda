@@ -1,0 +1,18 @@
+let true = \a.\b. a
+let false = \a.\b. b
+
+let P = \a.\b.\f. f a b
+
+let zero = \s.\z. z
+let one = \s.\z. s z
+let four = \s.\z. s (s (s (s z)))
+
+let is_zero = \x. x (\x. false) true
+let mul = \a.\b.\s. a (b s)
+let d = \x.\s.\z. (x (\p. P (p (\a.\b. b)) (s (p (\a.\b. b)))) P zero zero) (\a.\b. a)
+
+let Y = \f. ((\x. f (x x)) (\x. f (x x)))
+
+let fact = \x. Y (\n.\x.\s.\z. is_zero x one (mul x (n (d x) s z))) x
+
+print_num (fact four) # bad number?

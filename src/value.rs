@@ -14,6 +14,8 @@ pub enum Value {
     LazyCall {
         func: Rc<RefCell<Value>>,
         arg: Rc<RefCell<Value>>,
+        path: String,
+        span: logos::Span
     }
 }
 
@@ -23,9 +25,13 @@ impl Value {
     }
 
     pub fn eval(&self, state: &mut State) -> Result<Self, Box<dyn std::error::Error>> {
-        if let Value::LazyCall { func, arg } = self {
-            let func = func.borrow().eval(state)?;
+        if let Value::LazyCall { func, arg, path, span } = self {
+            let mut func = func.borrow().eval(state)?;
             let arg = arg.borrow().eval(state)?;
+
+            while let Value::LazyCall { .. } = &func {
+                func = func.eval(state)?;
+            }
 
             match func {
                 Value::NativeFunction(func) => func(state, arg),
@@ -40,7 +46,7 @@ impl Value {
                     state.pop_scope();
                     res
                 }
-                _ => Err(Box::new(crate::errors::CallNotFunction))
+                _ => Err(Box::new(crate::errors::CallNotFunction::new(path, span.clone())))
             }
         } else {
             Ok(self.clone())
@@ -58,6 +64,8 @@ impl Value {
             crate::parser::ActionKind::Call { func, arg } => Ok(Value::LazyCall {
                 func: Rc::new(RefCell::new(Self::from_action(state, func.as_ref().clone())?)),
                 arg: Rc::new(RefCell::new(Self::from_action(state, arg.as_ref().clone())?)),
+                path: func.path().into(),
+                span: func.span().start..arg.span().end
             }),
             crate::parser::ActionKind::FuncDef { arg, expr, captures: cap_names } => {
                 let mut captures =  Vec::with_capacity(cap_names.len());

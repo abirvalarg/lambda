@@ -1,5 +1,6 @@
 use std::{rc::Rc, cell::RefCell};
 
+use errors::CallNotFunction;
 use parser::ActionKind;
 
 use crate::value::Value;
@@ -40,7 +41,6 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn print_num(state: &mut state::State, val: Value) -> Result<Value, Box<dyn std::error::Error>> {
-    println!("{val:#?}");
     let tmp1 = Value::LazyCall {
         func: Rc::new(RefCell::new(val)),
         arg: Value::native_function(|_state, val| {
@@ -49,21 +49,34 @@ fn print_num(state: &mut state::State, val: Value) -> Result<Value, Box<dyn std:
             } else {
                 Err(Box::new(errors::BadNumber))
             }
-        })
+        }),
+        path: "/dev/null".into(),
+        span: 0..0
     };
-    let tmp1 = tmp1.eval(state)?;
-    let mut tmp2 = Value::LazyCall {
-        func: Rc::new(RefCell::new(tmp1)),
-        arg: Rc::new(RefCell::new(Value::Number(0)))
-    };
-    while let Value::LazyCall { .. } = &tmp2 {
-        tmp2 = tmp2.eval(state)?;
-    }
-    if let Value::Number(res) = tmp2 {
-        println!("{res}");
-        Ok(Value::NativeFunction(print_num))
-    } else {
-        Err(Box::new(errors::BadNumber))
+    match tmp1.eval(state) {
+        Ok(tmp1) => {
+            let mut tmp2 = Value::LazyCall {
+                func: Rc::new(RefCell::new(tmp1)),
+                arg: Rc::new(RefCell::new(Value::Number(0))),
+                path: "/dev/null".into(),
+                span: 0..0
+            };
+            while let Value::LazyCall { .. } = &tmp2 {
+                match tmp2.eval(state) {
+                    Ok(res) => tmp2 = res,
+                    Err(err) if err.is::<CallNotFunction>() => return Err(Box::new(errors::BadNumber)),
+                    other => return other
+                }
+            }
+            if let Value::Number(res) = tmp2 {
+                println!("{res}");
+                Ok(Value::NativeFunction(print_num))
+            } else {
+                Err(Box::new(errors::BadNumber))
+            }
+        }
+        Err(err) if err.is::<CallNotFunction>() => Err(Box::new(errors::BadNumber)),
+        other => other
     }
 }
 
