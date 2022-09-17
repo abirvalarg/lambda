@@ -21,6 +21,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     let mut state = state::State::new();
     let globals = state.globals_mut();
     globals.insert("print_num".into(), Value::native_function(print_num));
+    globals.insert("debug".into(), Value::native_function(debug));
     if let ActionKind::Chunk(actions) = actions.kind() {
         for action in actions {
             if let ActionKind::Assign { target, expr } = action.kind() {
@@ -78,6 +79,14 @@ fn print_num(state: &mut state::State, val: Value) -> Result<Value, Box<dyn std:
         Err(err) if err.is::<CallNotFunction>() => Err(Box::new(errors::BadNumber)),
         other => other
     }
+}
+
+fn debug(state: &mut state::State, mut val: Value) -> Result<Value, Box<dyn std::error::Error>> {
+    while let Value::LazyCall { .. } = &val {
+        val = val.eval(state)?;
+    }
+    println!("{val:#?}");
+    Ok(Value::NativeFunction(debug))
 }
 
 fn main() {
