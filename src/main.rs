@@ -44,7 +44,10 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
 fn print_num(state: &mut state::State, val: Value) -> Result<Value, Box<dyn std::error::Error>> {
     let tmp1 = Value::LazyCall {
         func: Rc::new(RefCell::new(val)),
-        arg: Value::native_function(|_state, val| {
+        arg: Value::native_function(|state, mut val| {
+            while let Value::LazyCall {..} = &val {
+                val = val.eval(state)?;
+            }
             if let Value::Number(num) = val {
                 Ok(Value::Number(num + 1))
             } else {
@@ -54,30 +57,26 @@ fn print_num(state: &mut state::State, val: Value) -> Result<Value, Box<dyn std:
         path: "/dev/null".into(),
         span: 0..0
     };
-    match tmp1.eval(state) {
-        Ok(tmp1) => {
-            let mut tmp2 = Value::LazyCall {
-                func: Rc::new(RefCell::new(tmp1)),
-                arg: Rc::new(RefCell::new(Value::Number(0))),
-                path: "/dev/null".into(),
-                span: 0..0
-            };
-            while let Value::LazyCall { .. } = &tmp2 {
-                match tmp2.eval(state) {
-                    Ok(res) => tmp2 = res,
-                    Err(err) if err.is::<CallNotFunction>() => return Err(Box::new(errors::BadNumber)),
-                    other => return other
-                }
+    let mut tmp2 = Value::LazyCall {
+        func: Rc::new(RefCell::new(tmp1)),
+        arg: Rc::new(RefCell::new(Value::Number(0))),
+        path: "/dev/null".into(),
+        span: 0..0
+    };
+    while let Value::LazyCall { .. } = &tmp2 {
+        match tmp2.eval(state) {
+            Ok(res) => tmp2 = res,
+            Err(err) if err.is::<CallNotFunction>() => {
+                return Err(Box::new(errors::BadNumber))
             }
-            if let Value::Number(res) = tmp2 {
-                println!("{res}");
-                Ok(Value::NativeFunction(print_num))
-            } else {
-                Err(Box::new(errors::BadNumber))
-            }
+            other => return other
         }
-        Err(err) if err.is::<CallNotFunction>() => Err(Box::new(errors::BadNumber)),
-        other => other
+    }
+    if let Value::Number(res) = tmp2 {
+        println!("{res}");
+        Ok(Value::NativeFunction(print_num))
+    } else {
+        Err(Box::new(errors::BadNumber))
     }
 }
 

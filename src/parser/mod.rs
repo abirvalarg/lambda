@@ -1,4 +1,4 @@
-use std::{iter::Peekable, vec::IntoIter, collections::HashSet};
+use std::{iter::Peekable, vec::IntoIter, collections::HashSet, fmt::Debug};
 
 use logos::Logos;
 
@@ -194,7 +194,7 @@ fn parse_function(start_span: logos::Span, tokens: &mut Peekable<IntoIter<Token>
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Action {
     path: String,
     span: logos::Span,
@@ -212,6 +212,12 @@ impl Action {
 
     pub fn span(&self) -> logos::Span {
         self.span.clone()
+    }
+}
+
+impl Debug for Action {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:#?}", self.kind)
     }
 }
 
