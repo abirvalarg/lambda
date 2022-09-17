@@ -1,5 +1,5 @@
-let two = \s.\z.s (s z)         # 2
-let three = \s.\z.s (s (s z))   # 3
+let 2 = \s.\z.s (s z)         # 2
+let 3 = \s.\z.s (s (s z))   # 3
 let mul = \a.\b.\s. a (b s)
-print_num (mul two three)       # 2 * 3
-debug two
+print_num (mul 2 3)       # 2 * 3
+debug 2
